@@ -34,7 +34,6 @@ namespace UWP_Scanner_Barcode
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-
         public bool IsScannerClaimed { get; set; } = false;
         public bool IsPreviewing { get; set; } = false;
         public bool ScannerSupportsPreview { get; set; } = false;
@@ -61,15 +60,15 @@ namespace UWP_Scanner_Barcode
         {
             this.InitializeComponent();
 
-            //ScannerListSource.Source = barcodeScanners;
-            DataContext = barcodeScanners;
+           DataContext = barcodeScanners;
+
             watcher = DeviceInformation.CreateWatcher(BarcodeScanner.GetDeviceSelector());
             watcher.Added += Watcher_Added;
             watcher.Removed += Watcher_Removed;
             watcher.Updated += Watcher_Updated;
             watcher.Start();
 
-            DataContext = this;
+            
         }
 
         private async void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
@@ -86,18 +85,10 @@ namespace UWP_Scanner_Barcode
             });
         }
 
-        private async void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                for (int i = barcodeScanners.Count - 1; i >= 0; i--)
-                {
-                    if (barcodeScanners[i].DeviceId == args.Id)
-                    {
-                        barcodeScanners.RemoveAt(i);
-                    }
-                }
-            });
+            // We don't do anything here, but this event needs to be handled to enable realtime updates.
+            // See https://aka.ms/devicewatcher_added.
         }
 
         private void Watcher_Updated(DeviceWatcher sender, DeviceInformationUpdate args)
@@ -106,8 +97,7 @@ namespace UWP_Scanner_Barcode
             //See https://aka.ms/devicewatcher_added.
         }
 
-
-
+   
         /// <summary>
         /// Starts previewing the selected scanner's video feed and prevents the display from going to sleep.
         /// </summary>
@@ -315,8 +305,7 @@ namespace UWP_Scanner_Barcode
             }
         }
 
-
-
+    
         /// <summary>
         /// Event handler for scanner listbox selection changed
         /// </summary>
@@ -355,9 +344,7 @@ namespace UWP_Scanner_Barcode
         /// <param name="scannerDeviceId"></param>
         private async Task SelectScannerAsync(string scannerDeviceId)
         {
-            try
-            {
-         isSelectionChanging = true;
+            isSelectionChanging = true;
 
             await CloseScannerResourcesAsync();
 
@@ -368,10 +355,12 @@ namespace UWP_Scanner_Barcode
                 claimedScanner = await selectedScanner.ClaimScannerAsync();
                 if (claimedScanner != null)
                 {
-                        //code39=137, code128 = 144 . qrcode = 168
-                        var symbologyList = new List<uint>() { 137, 144, 168 };
-                        await claimedScanner.SetActiveSymbologiesAsync(symbologyList);
-                        await claimedScanner.EnableAsync();
+
+                    ////code39=137, code128 = 144 . qrcode = 168
+                    //var symbologyList = new List<uint>() { 137, 144, 168 };
+                   
+                    //await claimedScanner.SetActiveSymbologiesAsync(symbologyList);
+                    await claimedScanner.EnableAsync();
                     claimedScanner.Closed += ClaimedScanner_Closed;
                     ScannerSupportsPreview = !String.IsNullOrEmpty(selectedScanner.VideoDeviceId);
                     RaisePropertyChanged(nameof(ScannerSupportsPreview));
@@ -385,7 +374,6 @@ namespace UWP_Scanner_Barcode
                 }
                 else
                 {
-
                     //rootPage.NotifyUser("Failed to claim the selected barcode scanner", NotifyType.ErrorMessage);
                 }
 
@@ -399,13 +387,6 @@ namespace UWP_Scanner_Barcode
             RaisePropertyChanged(nameof(IsScannerClaimed));
 
             isSelectionChanging = false;
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message.ToString());
-                return;
-            }
-   
         }
 
         /// <summary>
@@ -426,10 +407,11 @@ namespace UWP_Scanner_Barcode
         private async void ClaimedScanner_DataReceived(ClaimedBarcodeScanner sender, BarcodeScannerDataReceivedEventArgs args)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
+            { 
+                ScenarioOutputScanDataType.Text = BarcodeSymbologies.GetName(args.Report.ScanDataType);
                 ScenarioOutputScanDataLabel.Text = GetDataLabelString(args.Report.ScanDataLabel, args.Report.ScanDataType);
                 ScenarioOutputScanData.Text = GetDataString(args.Report.ScanData);
-                ScenarioOutputScanDataType.Text = BarcodeSymbologies.GetName(args.Report.ScanDataType);
+               
             });
         }
 
@@ -440,6 +422,23 @@ namespace UWP_Scanner_Barcode
         public void RaisePropertyChanged(string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        public static string GetDataString(IBuffer data)
+        {
+            if (data == null)
+            {
+                return "No data";
+            }
+
+            // Just to show that we have the raw data, we'll print the value of the bytes.
+            // Arbitrarily limit the number of bytes printed to 20 so the UI isn't overloaded.
+            string result = CryptographicBuffer.EncodeToHexString(data);
+            Console.WriteLine($"data : { data}");
+            if (result.Length > 40)
+            {
+                result = result.Substring(0, 40) + "...";
+            }
+            return result;
         }
 
         public static string GetDataLabelString(IBuffer data, uint scanDataType)
@@ -460,10 +459,11 @@ namespace UWP_Scanner_Barcode
                 scanDataType == BarcodeSymbologies.UpceAdd5 ||
                 scanDataType == BarcodeSymbologies.Ean8 ||
                 scanDataType == BarcodeSymbologies.TfStd ||
+                  scanDataType == BarcodeSymbologies.Qr ||
+                    scanDataType == BarcodeSymbologies.Code128 ||
                 scanDataType == BarcodeSymbologies.OcrA ||
-                scanDataType == BarcodeSymbologies.OcrB ||
-                  scanDataType == BarcodeSymbologies.Code128 ||
-                    scanDataType == BarcodeSymbologies.Qr)
+                scanDataType == BarcodeSymbologies.OcrB 
+             )
             {
                 // The UPC, EAN8, and 2 of 5 families encode the digits 0..9
                 // which are then sent to the app in a UTF8 string (like "01234").
@@ -473,22 +473,6 @@ namespace UWP_Scanner_Barcode
             // Some other symbologies (typically 2-D symbologies) contain binary data that
             // should not be converted to text.
             return string.Format("Decoded data unavailable. Raw label data: {0}", GetDataString(data));
-        }
-        public static string GetDataString(IBuffer data)
-        {
-            if (data == null)
-            {
-                return "No data";
-            }
-
-            // Just to show that we have the raw data, we'll print the value of the bytes.
-            // Arbitrarily limit the number of bytes printed to 20 so the UI isn't overloaded.
-            string result = CryptographicBuffer.EncodeToHexString(data);
-            if (result.Length > 40)
-            {
-                result = result.Substring(0, 40) + "...";
-            }
-            return result;
         }
     }
 }
