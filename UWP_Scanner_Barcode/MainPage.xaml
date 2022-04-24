@@ -1,0 +1,91 @@
+﻿<Page x:Class="UWP_Scanner_Barcode.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:UWP_Scanner_Barcode"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <ListBox x:Name="ScannerListBox"
+                 Grid.Row="0"
+                 ItemsSource="{Binding }"
+                 SelectionChanged="ScannerListBox_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="local:BarcodeScannerInfo">
+                    <TextBlock Text="{x:Bind Name}"
+                               VerticalAlignment="Center" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1">
+            <CheckBox Content="連續掃描"
+                      x:Name="checkbox_IsDisabledOnDataReceived" IsChecked="True"/>
+            <Button x:Name="btn_OpenScanner"
+                    Click="Btn_OpenScanner_Click"
+                    Content="開始掃描" />
+            <Button x:Name="btn_CloseScanner"
+                    Click="Btn_CloseScanner_Click"
+                    Content="關閉掃描" />
+            <Button x:Name="btn_ShowPreview"
+                    Click="Btn_ShowPreview_Click"
+                    Content="開啟預覽" />
+            <Button x:Name="btn_HidePreview"
+                    Click="Btn_HidePreview_Click"
+                    Content="關閉預覽" />
+            <TextBlock Text="掃描狀態:"
+                       Margin="5,0" />
+            <TextBlock x:Name="textbolck_ScannerStatus" Text="關閉"
+                       Margin="5,0" />
+        </StackPanel>
+        <Border BorderThickness="1"
+                BorderBrush="White"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Grid.Row="2">
+            <CaptureElement x:Name="PreviewControl"
+                            Stretch="Uniform"
+                            ManipulationMode="Scale" />
+        </Border>
+        <StackPanel Orientation="Vertical"
+                    Grid.Row="3">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Scan Data Type (Symbology):"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Right"
+                           Margin="0,0,5,0" />
+                <TextBlock x:Name="ScenarioOutputScanDataType"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Left"
+                           Text="No data" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Scan Data (Unformatted data):"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Right"
+                           Margin="0,0,5,0" />
+                <TextBlock x:Name="ScenarioOutputScanDataLabel"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Left"
+                           Text="No data" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Scan Data Label (Formatted data):"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Right"
+                           Margin="0,0,5,0" />
+                <TextBlock x:Name="ScenarioOutputScanData"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Left"
+                           Text="No data" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>
