@@ -1,2 +1,5 @@
 # UWP_Scanner_Barcode
 實作相機掃條碼，網址:https://docs.microsoft.com/zh-tw/windows/uwp/devices-sensors/pos-camerabarcode
+
+
+eagmaW6AtONvHX9zWAK0eQ:APA91bGbkUNFKpvWCsFGC0ghoy0bs0-zj9ehhOeIRp90QGU6S7hpOa2U9oC-Lp7Tve16hjkZQTSpAG7G8gZyhc7fT0IRy9B0QNOyqhJsiMosw_jjFPtITqY
